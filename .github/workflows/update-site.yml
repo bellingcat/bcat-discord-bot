@@ -1,4 +1,4 @@
-name: Update Featured Discord Threads
+name: Generate Featured Discord Threads HTML
 
 on:
   schedule:
@@ -31,3 +31,11 @@ jobs:
           DISCORD_FORUM_CHANNEL_IDS: ${{ secrets.DISCORD_FORUM_CHANNEL_IDS }}
           DISCORD_FEATURED_TAG_NAME: ${{ secrets.DISCORD_FEATURED_TAG_NAME }}
         run: python bot.py
+
+      - name: Commit dist folder
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add dist/
+          git commit -m "Update featured threads [skip ci]" || echo "No changes to commit"
+          git push
