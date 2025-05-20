@@ -29,13 +29,13 @@ def get_discussions():
     """API endpoint to get discussion data"""
     messages_data = load_messages()
     
-    # Get Discord guild ID from environment
+    
     guild_id = os.getenv('DISCORD_GUILD_ID', '')
     
-    # Format the data for the frontend
+    
     discussions = []
     
-    # Collect all messages across all channels
+    
     all_messages = []
     for channel_id, channel_data in messages_data["channels"].items():
         for message in channel_data["messages"]:
@@ -46,44 +46,55 @@ def get_discussions():
                 "category": channel_data["category"]
             })
     
-    # Sort all messages by timestamp (newest first)
+    
     all_messages.sort(key=lambda x: x["message"]["timestamp"], reverse=True)
     
-    # Create discussions from the most recent messages
+    
     for item in all_messages:
         message = item["message"]
         channel_id = item["channel_id"]
         channel_name = item["channel_name"]
         category = item["category"]
         
-        # Build Discord channel URL
+    
         discord_url = f"https://discord.com/channels/{guild_id}/{channel_id}/{message['id']}"
         
-        # Get the message timestamp
+    
         timestamp = message["timestamp"]
-        # Convert to human-readable time ago
-        time_ago = "1h ago"  # Simplified for now
+    
+        time_ago = timestamp
         
-        # Extract tags
+        def iso_to_human_readable(iso_string):
+            # Parse the ISO 8601 datetime string
+            dt = datetime.fromisoformat(iso_string)
+            # Format to a human-readable string
+            return dt.strftime('%A, %d %B %Y at %H:%M:%S')
+
+
+        time_ago = iso_to_human_readable(timestamp)
+        
         tags = []
         if category and category != "None":
             tags.append(category)
         
-        # Look for hashtags in content
+        
         content = message.get("content", "")
         hashtags = [word[1:] for word in content.split() if word.startswith("#")]
         tags.extend(hashtags)
         
-        # If no tags found, add a default one
+        
         if not tags:
             tags.append("Discussion")
         
-        # Create discussion object
+        # Set the title (use thread_name if available, otherwise default to channel name)
+        title = message.get("thread_name", f"Discussion in #{channel_name}")
+        
+        
         discussion = {
             "id": message["id"],
-            "title": f"Discussion in #{channel_name}",
+            "title": title,
             "content": content,
-            "message_count": 1,  # Simplified since we're now storing individual messages
+            "message_count": 1,  
             "reaction_count": len(message.get("reactions", [])),
             "time_ago": time_ago,
             "discord_url": discord_url,
@@ -92,7 +103,7 @@ def get_discussions():
         
         discussions.append(discussion)
     
-    # Limit to the 4 most recent discussions
+    
     discussions = discussions[:4]
     
     return jsonify({"discussions": discussions})
