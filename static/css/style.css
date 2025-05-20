@@ -99,19 +99,6 @@ header h1 {
   margin-bottom: 0;
 }
 
-.discord-icon {
-  background: var(--accent-color);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-}
-
 .discussions-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(300px, 1fr));
