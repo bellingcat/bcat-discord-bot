@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   fetchDiscussions();
+  makeCardsClickable();
 });
 
 async function fetchDiscussions() {
@@ -97,4 +98,17 @@ window.addEventListener("resize", function () {
 // Function to open Discord channel link
 function openDiscordChannel(url) {
   window.open(url, "_blank");
+}
+
+function makeCardsClickable() {
+  const cards = document.querySelectorAll(".discussion-card");
+
+  cards.forEach((card) => {
+    card.addEventListener("click", function () {
+      const link = this.querySelector("a").getAttribute("href");
+      if (link) {
+        window.open(link, "_blank");
+      }
+    });
+  });
 }

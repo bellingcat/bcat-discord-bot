@@ -1,6 +1,6 @@
-# Discord Bot with Web Interface
+# Discord Bot with Static Site Generator
 
-A Discord bot that collects forum threads with the 'Featured' tag and displays them in a web interface similar to a discussion board. The web interface can be embedded in a WordPress site via an iframe.
+A Discord bot that collects forum threads with the 'Featured' tag and generates a static HTML page. The static site can be embedded in a WordPress site via an iframe or hosted on GitHub Pages.
 
 ## Setup
 
@@ -19,50 +19,39 @@ A Discord bot that collects forum threads with the 'Featured' tag and displays t
 
 ## Running the Bot
 
-To run the Discord bot:
+To run the Discord bot and generate the static site:
 
 ```
 python bot.py
 ```
 
-This will connect to Discord and start monitoring the specified forum channels for threads with the 'Featured' tag.
+This will:
 
-## Running the Web Interface
+1. Connect to Discord
+2. Fetch threads with the 'Featured' tag from the specified forum channels
+3. Generate a static HTML site in the `dist` directory
 
-To run the web interface locally:
+## GitHub Actions Deployment
 
-```
-python web_interface.py
-```
+The bot is designed to be run on GitHub Actions periodically (e.g., every 5 minutes) to:
 
-This will start a Flask server on http://localhost:3010
-
-## Deploying to AWS
-
-To deploy the web interface to AWS S3 for WordPress embedding:
-
-1. Make sure you have AWS credentials configured
-2. Run the deployment script:
-   ```
-   python deploy.py --bucket your-bucket-name --region your-aws-region
-   ```
-3. The script will output an iframe code to embed in your WordPress site
+1. Fetch the latest featured threads from Discord
+2. Generate a fresh static HTML site
+3. Deploy it to GitHub Pages or another static hosting service
 
 ## Project Structure
 
-- `bot.py` - Discord bot that monitors forum threads with the 'Featured' tag
-- `web_interface.py` - Flask app that serves the web interface
-- `deploy.py` - Script to deploy to AWS S3
-- `templates/` - HTML templates
-- `static/` - CSS and JavaScript files
-- `data/` - Message storage
+- `bot.py` - Discord bot that fetches forum threads with the 'Featured' tag and generates a static site
+- `templates/` - HTML templates used for static site generation
+- `static/` - CSS, JavaScript, and font files for the static site
+- `dist/` - Output directory for the generated static site
 
 ## Features
 
-- Monitors forum threads with the 'Featured' tag
-- Automatically updates when tags are applied to threads
-- Displays the 4 most recent featured threads in a clean, modern interface
-- Shows thread titles and content
+- Fetches forum threads with the 'Featured' tag
+- Generates a clean, modern static interface showing the featured discussions
+- Displays thread titles and content
+- Shows message and reaction counts with proper Discord-style icons
+- Provides links back to the original Discord threads
 - Responsive design for all screen sizes
-- One-command deployment to AWS S3
-- Easy WordPress embedding via iframe
+- No server required - pure static HTML/CSS/JS
