@@ -128,7 +128,12 @@ def generate_static_site(messages_data):
             
             if not tags:
                 tags.append("Discussion")
-            
+            time_ago = message["timestamp"]
+            def iso_to_human_readable(iso_string):
+                dt = datetime.fromisoformat(iso_string)
+                return dt.strftime('%A, %d %B %Y at %H:%M:%S')
+
+            time_ago = iso_to_human_readable(time_ago)
             
             discussion = {
                 "id": message["id"],
@@ -138,7 +143,7 @@ def generate_static_site(messages_data):
                 "message_count": 1,
                 "reaction_count": len(message.get("reactions", [])),
                 "timestamp": message["timestamp"],
-                "time_ago": "Recently",
+                "time_ago": time_ago,
                 "discord_url": discord_url,
                 "tags": tags
             }
