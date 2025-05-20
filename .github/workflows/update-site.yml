@@ -1,9 +1,9 @@
-name: Generate Featured Discord Threads HTML
+name: Update Featured Discord Threads
 
 on:
   schedule:
-    - cron: "*/5 * * * *" # Run every 5 minutes
-  workflow_dispatch: # Allow manual trigger
+    - cron: "*/5 * * * *" # 5 mins
+  workflow_dispatch: # manual triger
 
 jobs:
   build:
@@ -31,10 +31,3 @@ jobs:
           DISCORD_FORUM_CHANNEL_IDS: ${{ secrets.DISCORD_FORUM_CHANNEL_IDS }}
           DISCORD_FEATURED_TAG_NAME: ${{ secrets.DISCORD_FEATURED_TAG_NAME }}
         run: python bot.py
-
-      - name: Upload generated HTML as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: discord-featured-threads
-          path: dist/
-          retention-days: 1
