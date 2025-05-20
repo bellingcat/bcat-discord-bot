@@ -1,6 +1,6 @@
 # Discord Bot with Static Site Generator
 
-A Discord bot that collects forum threads with the 'Featured' tag and generates a static HTML page. The static site can be embedded in a WordPress site via an iframe or hosted on GitHub Pages.
+A Discord bot that collects forum threads with the 'Featured' tag and generates a static HTML page. The static site can be viewed locally or served from any static file hosting.
 
 ## Setup
 
@@ -31,13 +31,12 @@ This will:
 2. Fetch threads with the 'Featured' tag from the specified forum channels
 3. Generate a static HTML site in the `dist` directory
 
-## GitHub Actions Deployment
+## Automated Execution
 
-The bot is designed to be run on GitHub Actions periodically (e.g., every 5 minutes) to:
+The bot can be set up to run periodically (e.g., every 5 minutes) using a task scheduler:
 
 1. Fetch the latest featured threads from Discord
 2. Generate a fresh static HTML site
-3. Deploy it to GitHub Pages or another static hosting service
 
 ## Project Structure
 

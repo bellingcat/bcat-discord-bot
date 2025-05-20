@@ -1,4 +1,4 @@
-name: Update Featured Discord Threads
+name: Generate Featured Discord Threads HTML
 
 on:
   schedule:
@@ -32,8 +32,9 @@ jobs:
           DISCORD_FEATURED_TAG_NAME: ${{ secrets.DISCORD_FEATURED_TAG_NAME }}
         run: python bot.py
 
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Upload generated HTML as artifact
+        uses: actions/upload-artifact@v3
         with:
-          folder: dist # The folder the action should deploy
-          branch: gh-pages # The branch the action should deploy to
+          name: discord-featured-threads
+          path: dist/
+          retention-days: 1
