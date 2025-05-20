@@ -10,7 +10,7 @@ __pycache__/
 env/
 build/
 develop-eggs/
-dist/
+# dist/  # Commented out to allow tracking of generated HTML
 downloads/
 eggs/
 .eggs/
