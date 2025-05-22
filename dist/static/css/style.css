@@ -101,7 +101,7 @@ header h1 {
 
 .discussions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, minmax(300px, 1fr));
   gap: 20px;
   overflow-y: auto;
   flex-grow: 1;
@@ -256,6 +256,5 @@ header h1 {
 
 html,
 body {
-  height: auto;
   min-height: 100%;
 }
