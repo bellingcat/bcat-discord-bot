@@ -66,11 +66,13 @@ async def process_thread(thread):
         return None
 
     try:
+        
         async for message in thread.history(limit=1, oldest_first=True):
             initial_message = message
             break
         else:
             return None
+
 
         # fetch last message
         last_message = await thread.fetch_message(thread.last_message_id)
@@ -86,7 +88,8 @@ async def process_thread(thread):
             },
             "channel_id": str(thread.parent_id),
             "channel_name": thread.parent.name if thread.parent else "Unknown",
-            "timestamp": last_message.created_at.isoformat(),
+            "timestamp": initial_message.created_at.isoformat(),
+            "latest_timestamp": last_message.created_at.isoformat(),
             "reactions": [{"emoji": str(reaction.emoji), "count": reaction.count} for reaction in initial_message.reactions],
             "attachments": [attachment.url for attachment in initial_message.attachments],
             "message_count": thread.message_count+1,
@@ -121,7 +124,8 @@ def generate_static_site(messages_data):
                 })
         
         
-        all_messages.sort(key=lambda x: x["message"]["timestamp"], reverse=True)
+        
+        all_messages.sort(key=lambda x: x["message"].get("latest_timestamp", x["message"]["timestamp"]), reverse=True)
         all_messages = all_messages[:4]  # Keep only 4 most recent
         
         
@@ -144,12 +148,15 @@ def generate_static_site(messages_data):
             
             if not tags:
                 tags.append("Discussion")
-            time_ago = message["timestamp"]
+            
+            
+            display_timestamp = message.get("latest_timestamp", message["timestamp"])
+            
             def iso_to_human_readable(iso_string):
                 dt = datetime.fromisoformat(iso_string)
                 return dt.strftime('%A, %d %B %Y at %H:%M:%S')
 
-            time_ago = iso_to_human_readable(time_ago)
+            time_ago = iso_to_human_readable(display_timestamp)
             
             discussion = {
                 "id": message["id"],
@@ -159,6 +166,7 @@ def generate_static_site(messages_data):
                 "message_count": item["message"]["message_count"],
                 "reaction_count": len(message.get("reactions", [])),
                 "timestamp": message["timestamp"],
+                "latest_timestamp": message.get("latest_timestamp", message["timestamp"]),
                 "time_ago": time_ago,
                 "discord_url": discord_url,
                 "tags": tags
@@ -263,54 +271,105 @@ async def on_ready():
             print(f'Fetching featured threads from forum channels: {FORUM_CHANNEL_IDS}')
             
             messages_data = {"channels": {}}
-            all_thread_data = []
+            featured_threads = []
+            batch_size = 10
             
+            
+            channel_batch_info = {}
             for forum_id in FORUM_CHANNEL_IDS:
-                try:
-                    forum_channel = guild.get_channel(forum_id)
-                    if not forum_channel:
-                        print(f"Could not find forum channel with ID: {forum_id}")
-                        continue
-                    
-                    print(f"Processing forum channel: {forum_channel.name}")
-                    
-                    thread_count = 0
-                    if hasattr(forum_channel, 'threads'):
-                        for thread in forum_channel.threads:
-                            thread_count += 1
-                            thread_data = await process_thread(thread)
-                            print(thread_data)
-                            if thread_data:
-                                all_thread_data.append((thread_data, forum_channel.name))
-                                print(f"Added active thread {thread.name} as it has the Featured tag")
-                    
+                channel_batch_info[forum_id] = {
+                    'active_offset': 0,
+                    'archived_cursor': None,
+                    'has_more': True
+                }
+            
+            
+            batch_number = 1
+            while len(featured_threads) < 4 and any(info['has_more'] for info in channel_batch_info.values()):
+                print(f"Processing batch #{batch_number}")
+                batch_threads = []
+                
+            
+                for forum_id in FORUM_CHANNEL_IDS:
+
                     try:
-                        print(f"Attempting to fetch archived threads from {forum_channel.name}")
-                        archived_threads = []
-                        async for thread in forum_channel.archived_threads():
-                            archived_threads.append(thread)
-                            
-                        print(f"Found {len(archived_threads)} archived threads in {forum_channel.name}")
+                        forum_channel = guild.get_channel(forum_id)
+                        if not forum_channel:
+                            print(f"Could not find forum channel with ID: {forum_id}")
+                            channel_batch_info[forum_id]['has_more'] = False
+                            continue
                         
-                        for thread in archived_threads:
-                            thread_data = await process_thread(thread)
-                            if thread_data:
-                                all_thread_data.append((thread_data, forum_channel.name))
-                                print(f"Added archived thread {thread.name} as it has the Featured tag")
+                        batch_info = channel_batch_info[forum_id]
+                        
+                     
+                        if hasattr(forum_channel, 'threads') and batch_info['active_offset'] < len(forum_channel.threads):
+                            end_idx = min(batch_info['active_offset'] + batch_size, len(forum_channel.threads))
+                            active_batch = forum_channel.threads[batch_info['active_offset']:end_idx]
+                            batch_info['active_offset'] = end_idx
+                            
+                            if batch_info['active_offset'] >= len(forum_channel.threads):
+                             
+                                print(f"Processed all active threads in {forum_channel.name}, moving to archived threads")
+                            else:
+                                print(f"Processing active threads {batch_info['active_offset']-len(active_batch)+1}-{batch_info['active_offset']} of {len(forum_channel.threads)} in {forum_channel.name}")
+                            
+                            batch_threads.extend([(thread, forum_channel.name) for thread in active_batch])
+                        
+                        
+                        elif batch_info['has_more']:
+                            try:
+                                print(f"Fetching archived threads batch from {forum_channel.name}")
+                                archived_batch = []
+                                
+                        
+                                async for thread in forum_channel.archived_threads(
+                                    limit=batch_size,
+                                    before=batch_info['archived_cursor']
+                                ):
+                                    archived_batch.append(thread)
+                        
+                                    batch_info['archived_cursor'] = thread.created_at
+                                
+                                if not archived_batch:
+                                    batch_info['has_more'] = False
+                                    print(f"No more archived threads in {forum_channel.name}")
+                                else:
+                                    print(f"Processing {len(archived_batch)} archived threads from {forum_channel.name}")
+                                    batch_threads.extend([(thread, forum_channel.name) for thread in archived_batch])
+                            except Exception as e:
+                                print(f"Error fetching archived threads: {e}")
+                                batch_info['has_more'] = False
+                        else:
+                        
+                            batch_info['has_more'] = False
+                    
                     except Exception as e:
-                        print(f"Error fetching archived threads: {e}")
+                        print(f"Error processing forum channel {forum_id}: {e}")
+                        channel_batch_info[forum_id]['has_more'] = False
+                
+
+                for thread, channel_name in batch_threads:
+                    thread_data = await process_thread(thread)
+                    if thread_data:
+                        featured_threads.append((thread_data, channel_name))
+                        print(f"Added thread {thread.name} as it has the Featured tag")
+                        
+
+                        featured_threads.sort(key=lambda x: x[0]["latest_timestamp"], reverse=True)
+                        if len(featured_threads) > 4:
+                            featured_threads = featured_threads[:4]
+                
+                print(f"After batch #{batch_number}: found {len(featured_threads)} featured threads")
+                
+                
+                if len(featured_threads) >= 4:
+                    print("Found 4 featured threads, stopping batch processing")
+                    break
                     
-                    print(f"Processed {thread_count} active threads in {forum_channel.name}")
-                    
-                except Exception as e:
-                    print(f"Error processing forum channel {forum_id}: {e}")
+                batch_number += 1
             
-            all_thread_data.sort(key=lambda x: x[0]["timestamp"], reverse=True)
-            recent_threads = all_thread_data[:4]
             
-            print(f"Found {len(all_thread_data)} total featured threads, keeping {len(recent_threads)} most recent")
-            
-            for thread_data, channel_name in recent_threads:
+            for thread_data, channel_name in featured_threads:
                 channel_id = thread_data["channel_id"]
                 
                 if channel_id not in messages_data["channels"]:
@@ -328,10 +387,8 @@ async def on_ready():
     except Exception as e:
         print(f"Error during processing: {e}")
     finally:
-        
         print("Shutting down bot")
         await bot.close()
-        
         sys.exit(0)
 
 async def main():
