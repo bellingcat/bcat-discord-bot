@@ -259,6 +259,7 @@ header h1 {
 
   h1 {
     font-size: 18px;
+    text-wrap: wrap;
   }
 }
 
