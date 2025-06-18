@@ -154,7 +154,7 @@ def generate_static_site(messages_data):
             
             def iso_to_human_readable(iso_string):
                 dt = datetime.fromisoformat(iso_string)
-                return dt.strftime('%A, %d %B %Y at %H:%M:%S')
+                return dt.strftime('%B %d %Y at %H:%M:%S')
 
             time_ago = iso_to_human_readable(display_timestamp)
             
