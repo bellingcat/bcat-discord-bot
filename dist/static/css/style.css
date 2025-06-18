@@ -93,6 +93,7 @@ h1 {
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 30px;
+  text-wrap: nowrap;
 }
 
 header h1 {
@@ -101,7 +102,7 @@ header h1 {
 
 .discussions-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, minmax(200px, 1fr));
   gap: 20px;
   overflow-y: auto;
   flex-grow: 1;
@@ -133,6 +134,8 @@ header h1 {
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 10px;
+  overflow: hidden;
+  height: 27px;
 }
 
 .tag {
@@ -205,6 +208,8 @@ header h1 {
 .time {
   color: var(--secondary-text);
   font-size: 13px;
+  text-wrap: nowrap;
+  margin-left: 10px;
 }
 
 /* Support both class styles for backwards compatibility */
