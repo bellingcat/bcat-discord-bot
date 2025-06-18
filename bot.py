@@ -6,7 +6,6 @@ import json
 from datetime import datetime
 import asyncio
 import shutil
-import jinja2
 import sys
 import re
 
@@ -48,6 +47,20 @@ def has_featured_tag(thread):
     
     return False
 
+def get_tags(thread):
+    """Get the tags of a thread"""
+    if not hasattr(thread, 'applied_tags'):
+        return []
+    
+    tags = []
+    for tag in thread.applied_tags:
+        if hasattr(tag, 'name'):
+            tags.append(tag.name)
+        elif isinstance(tag, str):
+            tags.append(tag)
+    
+    return [t for t in tags if t != FEATURED_TAG_NAME]  # Exclude the Featured tag itself
+
 async def process_thread(thread):
     if not has_featured_tag(thread):
         return None
@@ -58,7 +71,10 @@ async def process_thread(thread):
             break
         else:
             return None
-        
+
+        # fetch last message
+        last_message = await thread.fetch_message(thread.last_message_id)
+
         message_data = {
             "id": str(initial_message.id),
             "content": initial_message.content,
@@ -70,9 +86,11 @@ async def process_thread(thread):
             },
             "channel_id": str(thread.parent_id),
             "channel_name": thread.parent.name if thread.parent else "Unknown",
-            "timestamp": initial_message.created_at.isoformat(),
+            "timestamp": last_message.created_at.isoformat(),
             "reactions": [{"emoji": str(reaction.emoji), "count": reaction.count} for reaction in initial_message.reactions],
-            "attachments": [attachment.url for attachment in initial_message.attachments]
+            "attachments": [attachment.url for attachment in initial_message.attachments],
+            "message_count": thread.message_count+1,
+            "tags": get_tags(thread)
         }
         
         return message_data
@@ -113,13 +131,11 @@ def generate_static_site(messages_data):
             channel_name = item["channel_name"]
             category = item["category"]
             
-            discord_url = f"https://discord.com/channels/{guild_id}/{channel_id}/{message['id']}"
+            discord_url = f"https://discord.com/channels/{guild_id}/{channel_id}/threads/{message['id']}"
             
-            
-            tags = []
+            tags = item["message"].get("tags", [])
             if category and category != "None":
-                tags.append(category)
-            
+                tags.append(category)            
             
             content = message.get("content", "")
             hashtags = re.findall(r'#(\w+)', content)
@@ -140,7 +156,7 @@ def generate_static_site(messages_data):
                 "title": message.get("thread_name", f"Discussion in #{channel_name}"),
                 "content": content,
                 "channel": channel_name,
-                "message_count": 1,
+                "message_count": item["message"]["message_count"],
                 "reaction_count": len(message.get("reactions", [])),
                 "timestamp": message["timestamp"],
                 "time_ago": time_ago,
@@ -164,8 +180,7 @@ def generate_static_site(messages_data):
             <div class="discussion-card">
                 <div class="card-header">
                     <div class="tags">
-                        <span class="tag">Text channels</span>
-                        <span class="tag">{discussion["channel"]}</span>
+                        {tags_html}
                     </div>
                     <h2 class="title"><a href="{discussion["discord_url"]}" target="_blank">{discussion["title"]}</a></h2>
                 </div>
@@ -241,6 +256,7 @@ def generate_static_site(messages_data):
 async def on_ready():
     try:
         print(f'{bot.user.name} has connected to Discord!')
+        print(bot.guilds)
         guild = discord.utils.get(bot.guilds, id=GUILD_ID)
         if guild:
             print(f'Connected to guild: {guild.name}')
@@ -263,6 +279,7 @@ async def on_ready():
                         for thread in forum_channel.threads:
                             thread_count += 1
                             thread_data = await process_thread(thread)
+                            print(thread_data)
                             if thread_data:
                                 all_thread_data.append((thread_data, forum_channel.name))
                                 print(f"Added active thread {thread.name} as it has the Featured tag")

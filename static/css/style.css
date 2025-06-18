@@ -252,6 +252,10 @@ header h1 {
   .discussions-grid {
     grid-template-columns: 1fr;
   }
+
+  h1 {
+    font-size: 18px;
+  }
 }
 
 html,
