@@ -70,7 +70,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .header-left {
@@ -154,7 +154,6 @@ header h1 {
 .title {
   font-size: 18px;
   font-weight: 700;
-  margin: 10px 0;
 }
 
 .title a {
@@ -168,7 +167,7 @@ header h1 {
 
 .card-body {
   flex-grow: 1;
-  padding: 0 15px 15px 15px;
+  padding: 0 15px 10px 15px;
 }
 
 .content {
@@ -185,7 +184,7 @@ header h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
+  padding: 10px 15px 10px 15px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
