@@ -5,6 +5,9 @@ on:
     - cron: "*/5 * * * *" # 5 mins
   workflow_dispatch: # manual triger
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
