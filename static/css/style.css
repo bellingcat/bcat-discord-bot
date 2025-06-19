@@ -104,14 +104,12 @@ header h1 {
   display: grid;
   grid-template-columns: repeat(2, minmax(200px, 1fr));
   gap: 20px;
-  overflow-y: auto;
   flex-grow: 1;
 }
 
 .discussion-card {
   background-color: var(--card-background);
   border-radius: 8px;
-  overflow: hidden;
   transition: transform 0.2s;
   height: 100%;
   display: flex;
@@ -157,6 +155,11 @@ header h1 {
 .title {
   font-size: 18px;
   font-weight: 700;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  display: -webkit-box;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
 }
 
 .title a {
