@@ -104,7 +104,6 @@ header h1 {
   display: grid;
   grid-template-columns: repeat(2, minmax(200px, 1fr));
   gap: 20px;
-  overflow-y: auto;
   flex-grow: 1;
 }
 
