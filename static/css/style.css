@@ -264,6 +264,16 @@ header h1 {
     font-size: 18px;
     text-wrap: wrap;
   }
+
+  .card-body {
+    display: none;
+    overflow-x: hidden;
+  }
+
+  .discussions-grid {
+    margin-bottom: 15px;
+  }
+  }
 }
 
 html,
