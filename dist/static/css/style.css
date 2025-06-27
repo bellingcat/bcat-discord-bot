@@ -274,9 +274,6 @@ header h1 {
   .discussions-grid {
     margin-bottom: 15px;
   }
-<<<<<<< HEAD
-  }
-=======
 }
 
 .title:hover {
@@ -285,7 +282,6 @@ header h1 {
   display: block;
   /* background-color: var(--card-background); */
   /* height: 28.8px; */
->>>>>>> 7dc1217 (don't worry about overflow)
 }
 
 html,
