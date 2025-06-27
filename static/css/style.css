@@ -116,6 +116,7 @@ header h1 {
   flex-direction: column;
   cursor: pointer;
   position: relative;
+  overflow: hidden;
 }
 
 .discussion-card:hover {
@@ -273,7 +274,14 @@ header h1 {
   .discussions-grid {
     margin-bottom: 15px;
   }
-  }
+}
+
+.title:hover {
+  -webkit-line-clamp: none;
+  /* overflow: visible; */
+  display: block;
+  /* background-color: var(--card-background); */
+  /* height: 28.8px; */
 }
 
 html,
