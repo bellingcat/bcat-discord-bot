@@ -2,7 +2,7 @@ name: Generate Featured Discord Threads HTML
 
 on:
   schedule:
-    - cron: "*/10 * * * *" # 10 mins
+    - cron: "*/20 * * * *" # 20 mins
   workflow_dispatch: # manual triger
 
 permissions:
