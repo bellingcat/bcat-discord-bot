@@ -119,7 +119,7 @@ async def process_thread(thread):
             "attachments": [attachment.url for attachment in initial_message.attachments],
             "message_count": thread.message_count+1,
             "tags": get_tags(thread),
-            "channel_mentions": channel_mentions
+            "channel_mentions": channel_mentions,
         }
         
         return message_data
@@ -168,10 +168,6 @@ def generate_static_site(messages_data):
                 tags.append(category)            
             
             content = message.get("content", "")
-
-            hashtags = re.findall(r'#(\w+)', content)
-            tags.extend(hashtags)
-            
             
             if not tags:
                 tags.append("Discussion")
@@ -256,7 +252,6 @@ def generate_static_site(messages_data):
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recent community discussions on Discord</title>
     <link rel="stylesheet" href="static/css/style.css">
-    <script src="static/js/script.js" defer></script>
 </head>
 <body>
     <div class="container">
