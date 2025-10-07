@@ -61,6 +61,22 @@ def get_tags(thread):
     
     return [t for t in tags if t != FEATURED_TAG_NAME]  # Exclude the Featured tag itself
 
+def expand_channel_mentions(text, guild):
+    """Replace occurrences of <#channel_id> with #channel-name in the provided text."""
+    if not text:
+        return text
+
+    def replace_match(match):
+        try:
+            channel_id = int(match.group(1))
+        except Exception:
+            return match.group(0)
+
+        channel = guild.get_channel(channel_id) if guild else None
+        return f"#{channel.name}" if channel and hasattr(channel, 'name') else match.group(0)
+
+    return re.sub(r'<#(\d+)>', replace_match, text)
+
 async def process_thread(thread):
     if not has_featured_tag(thread):
         return None
@@ -77,9 +93,18 @@ async def process_thread(thread):
         # fetch last message
         last_message = await thread.fetch_message(thread.last_message_id)
 
+        # Expand channel mention IDs in content
+        expanded_content = expand_channel_mentions(initial_message.content, getattr(thread, 'guild', None))
+
+        # Collect channel mentions as readable names
+        try:
+            channel_mentions = [f"#{c.name}" for c in getattr(initial_message, 'channel_mentions', []) if hasattr(c, 'name')]
+        except Exception:
+            channel_mentions = []
+
         message_data = {
             "id": str(initial_message.id),
-            "content": initial_message.content,
+            "content": expanded_content,
             "thread_name": thread.name,
             "author": {
                 "id": str(initial_message.author.id),
@@ -93,7 +118,8 @@ async def process_thread(thread):
             "reactions": [{"emoji": str(reaction.emoji), "count": reaction.count} for reaction in initial_message.reactions],
             "attachments": [attachment.url for attachment in initial_message.attachments],
             "message_count": thread.message_count+1,
-            "tags": get_tags(thread)
+            "tags": get_tags(thread),
+            "channel_mentions": channel_mentions
         }
         
         return message_data
@@ -142,6 +168,7 @@ def generate_static_site(messages_data):
                 tags.append(category)            
             
             content = message.get("content", "")
+
             hashtags = re.findall(r'#(\w+)', content)
             tags.extend(hashtags)
             
