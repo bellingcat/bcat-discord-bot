@@ -252,7 +252,7 @@ def generate_static_site(messages_data):
     <!-- Privacy-friendly analytics by Plausible -->
     <script async src="https://plausible.io/js/pa-6l83wntjZa4_tpVPGrV9M.js"></script>
     <script>
-      window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+      window.plausible=window.plausible||function(){{(plausible.q=plausible.q||[]).push(arguments)}},plausible.init=plausible.init||function(i){{plausible.o=i||{}}};
       plausible.init()
     </script>
 </head>
