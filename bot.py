@@ -28,7 +28,8 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 featured_threads = []
 
 
-def has_featured_tag(thread):
+def has_featured_tag(thread) -> bool:
+    # TODO: add type annotations for remaining parameters/return type
     """Check if a thread has the Featured tag"""
     if not hasattr(thread, 'applied_tags'):
         return False
@@ -47,7 +48,8 @@ def has_featured_tag(thread):
     
     return False
 
-def get_tags(thread):
+def get_tags(thread) -> list:
+    # TODO: add type annotations for remaining parameters/return type
     """Get the tags of a thread"""
     if not hasattr(thread, 'applied_tags'):
         return []
@@ -61,7 +63,8 @@ def get_tags(thread):
     
     return [t for t in tags if t != FEATURED_TAG_NAME]  # Exclude the Featured tag itself
 
-def expand_channel_mentions(text, guild):
+def expand_channel_mentions(text: str, guild):
+    # TODO: add type annotations for remaining parameters/return type
     """Replace occurrences of <#channel_id> with #channel-name in the provided text."""
     if not text:
         return text
@@ -77,7 +80,8 @@ def expand_channel_mentions(text, guild):
 
     return re.sub(r'<#(\d+)>', replace_match, text)
 
-async def process_thread(thread):
+async def process_thread(thread) -> None:
+    # TODO: add type annotations for remaining parameters/return type
     if not has_featured_tag(thread):
         return None
 
@@ -127,7 +131,8 @@ async def process_thread(thread):
         print(f"Error processing thread {thread.name}: {e}")
         return None
 
-def generate_static_site(messages_data):
+def generate_static_site(messages_data) -> None:
+    # TODO: add type annotations for remaining parameters/return type
     try:
         if os.path.exists('static'):
             if os.path.exists(f'{OUTPUT_DIR}/static'):
@@ -277,7 +282,7 @@ def generate_static_site(messages_data):
 """
         
         # Write the index.html file
-        with open(f'{OUTPUT_DIR}/index.html', 'w') as f:
+        with open(f'{OUTPUT_DIR}/index.html', 'w', encoding="utf-8") as f:
             f.write(index_html)
             
         print(f"Successfully generated static site in {OUTPUT_DIR} directory")
@@ -286,7 +291,7 @@ def generate_static_site(messages_data):
         print(f"Error generating static site: {e}")
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     try:
         print(f'{bot.user.name} has connected to Discord!')
         print(bot.guilds)
@@ -346,7 +351,7 @@ async def on_ready():
         print("Shutting down bot")
         await bot.close()
 
-async def main():
+async def main() -> None:
     # Use context manager to ensure the underlying HTTP connector is closed cleanly
     async with bot:
         await bot.start(TOKEN)
